@@ -108,7 +108,7 @@ class FlowRect:
 
     @property
     def aspect(self):
-        return self.height / self.width
+        return self.width / self.height
 
     @property
     def shape(self):
