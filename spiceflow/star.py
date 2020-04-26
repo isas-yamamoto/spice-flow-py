@@ -108,7 +108,7 @@ _star_map = [
 
 def star_texture(pos_x, pos_y, mag, color, width, height):
     mag_idx = np.clip(int(np.floor(mag + 0.5)), 0, 7)
-    img = np.zeros(shape=(width, height, 4), dtype=np.uint8)
+    img = np.zeros(shape=(height, width, 4), dtype=np.uint8)
     star = _star_map[mag_idx]
     d = len(star)
     cx = -d / 2
@@ -117,5 +117,5 @@ def star_texture(pos_x, pos_y, mag, color, width, height):
         px = int(pos_x + cx + x)
         py = int(pos_y + cy + y)
         if px >= 0 and px < width and py >= 0 and py < height:
-            img[px, py, 0:3] = np.array(color) * star[x][y] / 255.0
+            img[py, px, 0:3] = np.array(color) * star[x][y] / 255.0
     return img

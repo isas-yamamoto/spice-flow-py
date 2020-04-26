@@ -40,7 +40,7 @@ def render_solar_object(solar_object, wireframe):
 def render_star(star, width, height):
     pos = star["image_pos"]
     return star_texture(
-        pos[0], pos[1], star["visual_magnitude"], star["color"], width, height
+        pos[1], pos[0], star["visual_magnitude"], star["color"], width, height
     )
 
 
@@ -58,7 +58,7 @@ def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
     scene.add(camera, pose=camera_pose)
 
     star_image = np.zeros(
-        shape=(obsinfo.width, obsinfo.height, 4), dtype=np.uint8
+        shape=(obsinfo.height, obsinfo.width, 4), dtype=np.uint8
     )
 
     for star in obsinfo.stars:
