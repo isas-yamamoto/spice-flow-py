@@ -40,7 +40,7 @@ def render_solar_object(solar_object, wireframe):
 def render_star(star, width, height):
     pos = star["image_pos"]
     return star_texture(
-        pos[1], pos[0], star["visual_magnitude"], star["color"], width, height
+        pos[0], pos[1], star["visual_magnitude"], star["color"], width, height
     )
 
 
