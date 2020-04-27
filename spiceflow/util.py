@@ -6,8 +6,12 @@ def vec_padist(vec1, vec2):
     """
     Calculate position angle
 
+    Parameters
+    ----------
     vec1 : numpy.ndarray
+        position vector of target 1
     vec2 : numpy.ndarray
+        position vector of target 2
 
     Returns
     -------
@@ -39,6 +43,19 @@ def vec_padist(vec1, vec2):
 
 
 def get_object_type(object_id):
+    """
+    Obtain object type
+
+    Parameters
+    ----------
+    object_id : int
+        object identifier
+
+    Returns
+    -------
+    object_type : str
+        type of object
+    """
     # https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
     if object_id < -100000:
         # artificial satellite (earth orbitting spacecraft)

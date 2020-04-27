@@ -5,6 +5,8 @@ def viewport_frustum(rect, width, height, v):
     """
     Get corresponding point on viewport
 
+    Parameters
+    ----------
     rect : FlowRect
         FOV rectangle
     width : int

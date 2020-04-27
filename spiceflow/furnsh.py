@@ -5,7 +5,10 @@ import spiceypy as spice
 from pathlib import Path
 
 
-def mk_to_urls(meta_kernel, url, local_dir, remote_root):
+__all__ = ["download", "remote_furnsh"]
+
+
+def _meta_kernel_to_urls(meta_kernel, url, local_kernel_dir, remote_root):
     spice.ldpool(meta_kernel)
     path_values = spice.gcpool("PATH_VALUES", 0, 256)
     path_symbols = spice.gcpool("PATH_SYMBOLS", 0, 256)
@@ -16,7 +19,7 @@ def mk_to_urls(meta_kernel, url, local_dir, remote_root):
         symbols[f"${path_symbol}"] = path_value
 
     url_base = urllib.parse.urljoin(url, remote_root)
-    path_base = Path(local_dir)
+    path_base = Path(local_kernel_dir)
     kernel_urls = []
     for kernel in kernels_to_load:
         for key in symbols:
@@ -28,13 +31,7 @@ def mk_to_urls(meta_kernel, url, local_dir, remote_root):
     return kernel_urls
 
 
-def download(url, local_pathname):
-    with urllib.request.urlopen(url) as response:
-        with open(local_pathname, "wb+") as f:
-            f.write(response.read())
-
-
-def download_kernels(kernels, verbose=True):
+def _download_kernels(kernels, verbose=True):
     for kernel_url, kernel_pathname in kernels:
         if verbose is True:
             print("{} ==> {}".format(kernel_url, kernel_pathname))
@@ -45,7 +42,7 @@ def download_kernels(kernels, verbose=True):
             download(kernel_url, kernel_pathname)
 
 
-def make_new_mk(kernels, local_dir, new_pathname):
+def _make_new_meta_kernel(kernels, local_kernel_dir, new_pathname):
     path_values = spice.gcpool("PATH_VALUES", 0, 256)
     path_symbols = spice.gcpool("PATH_SYMBOLS", 0, 256)
     kernels_to_load = spice.gcpool("KERNELS_TO_LOAD", 0, 1024)
@@ -54,7 +51,7 @@ def make_new_mk(kernels, local_dir, new_pathname):
     s += "\\begindata\n"
     # PATH_VALUES
     s += "  PATH_VALUES     = (\n"
-    path_base = Path(local_dir)
+    path_base = Path(local_kernel_dir)
     for path_value in path_values:
         s += "    '" + str(path_base / path_value) + "'\n"
     s += "  )\n"
@@ -72,16 +69,34 @@ def make_new_mk(kernels, local_dir, new_pathname):
         f.write(s)
 
 
+def download(url, filename):
+    """
+    download a file from url
+
+    Parameters
+    ----------
+    url : str
+        the url of the request
+    filename : str
+        local filename
+    """
+    with urllib.request.urlopen(url) as response:
+        with open(filename, "wb+") as f:
+            f.write(response.read())
+
+
 def remote_furnsh(
-    url, filename, local_dir=".", remote_root="../..", verbose=True
+    url, filename, local_kernel_dir=".", remote_root="../..", verbose=True
 ):
     mk = tempfile.NamedTemporaryFile(delete=False)
     with urllib.request.urlopen(url) as response:
         content = response.read()
         mk.write(content)
     mk.close()
-    kernels = mk_to_urls(mk.name, url, local_dir, remote_root)
-    download_kernels(kernels, verbose)
-    make_new_mk(kernels, local_dir, filename)
+    kernels = _meta_kernel_to_urls(
+        mk.name, url, local_kernel_dir, remote_root
+    )
+    _download_kernels(kernels, verbose)
+    _make_new_meta_kernel(kernels, local_kernel_dir, filename)
     Path(mk.name).unlink()
     spice.furnsh(filename)
