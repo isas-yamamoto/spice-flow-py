@@ -23,7 +23,8 @@ def render_solar_object(solar_object, wireframe):
             uv = np.array(uv)
             im = Image.open(model["file"])
             sphere.visual = trimesh.visual.TextureVisuals(
-                uv=uv, image=ImageOps.flip(im),
+                uv=uv,
+                image=ImageOps.flip(im),
             )
             mesh = pyrender.Mesh.from_trimesh(
                 mesh=sphere, smooth=True, wireframe=wireframe
@@ -76,8 +77,14 @@ def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
 
     # Render the scene
     r = pyrender.OffscreenRenderer(obsinfo.width, obsinfo.height)
-    flags = (
-        pyrender.RenderFlags.RGBA | pyrender.RenderFlags.SHADOWS_DIRECTIONAL
+    flags = pyrender.RenderFlags.RGBA | pyrender.RenderFlags.SHADOWS_DIRECTIONAL
+    foreground, _ = r.render(scene, flags=flags)
+
+    # background layer: star_image, foreground layer:foreground
+    bg_color.append(1.0)
+    bg_color_int = (np.array(bg_color) * 255).astype(int)
+    return np.where(
+        foreground != bg_color_int,
+        foreground,
+        np.where(star_image != [0, 0, 0, 0], star_image, bg_color_int),
     )
-    color, _ = r.render(scene, flags=flags)
-    return color + star_image
