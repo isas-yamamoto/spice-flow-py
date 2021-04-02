@@ -80,5 +80,4 @@ def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
         pyrender.RenderFlags.RGBA | pyrender.RenderFlags.SHADOWS_DIRECTIONAL
     )
     color, _ = r.render(scene, flags=flags)
-    color += star_image
-    return color
+    return color + star_image
