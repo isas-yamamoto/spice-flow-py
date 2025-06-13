@@ -10,9 +10,7 @@ def render_solar_object(solar_object, wireframe):
     if "model" in solar_object:
         model = solar_object["model"]
         if model["type"] == "texture-body":
-            sphere = trimesh.creation.uv_sphere(
-                radius=solar_object["radius"][0]
-            )
+            sphere = trimesh.creation.uv_sphere(radius=solar_object["radius"][0])
             vs = trimesh.creation.uv_sphere().vertices
             uv = []
             for v in vs:
@@ -45,7 +43,7 @@ def render_star(star, width, height):
     )
 
 
-def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
+def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False, intensity=10.0):
     scene = pyrender.Scene(bg_color=bg_color)
     camera = pyrender.PerspectiveCamera(
         yfov=np.radians(obsinfo.fov.fovy), aspectRatio=obsinfo.fov.aspect
@@ -58,9 +56,7 @@ def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
     )
     scene.add(camera, pose=camera_pose)
 
-    star_image = np.zeros(
-        shape=(obsinfo.height, obsinfo.width, 4), dtype=np.uint8
-    )
+    star_image = np.zeros(shape=(obsinfo.height, obsinfo.width, 4), dtype=np.uint8)
 
     for star in obsinfo.stars:
         star_image += render_star(star, obsinfo.width, obsinfo.height)
@@ -69,11 +65,21 @@ def render(obsinfo, bg_color=[0.0, 0.0, 0.0], wireframe=False):
         mesh, pose = render_solar_object(solar_object, wireframe)
         scene.add(mesh, pose=pose)
 
-    # light = pyrender.PointLight(color=[1.0, 1.0, 1.0], intensity=3.8e27)
-    light = pyrender.PointLight(color=[1.0, 1.0, 1.0], intensity=3.8e17)
-    pose = np.identity(4)
-    pose[0:3, 3] = -obsinfo.pos
-    scene.add(light, pose=pose)
+    light = pyrender.DirectionalLight(color=[1.0, 1.0, 1.0], intensity=intensity)
+
+    light_direction = obsinfo.pos
+    light_direction /= np.linalg.norm(light_direction)
+
+    z_axis = -light_direction
+    up_vector = np.array([0.0, 1.0, 0.0])
+    x_axis = np.cross(up_vector, z_axis)
+    x_axis /= np.linalg.norm(x_axis)
+    y_axis = np.cross(z_axis, x_axis)
+    light_pose = np.eye(4)
+    light_pose[:3, 0] = x_axis
+    light_pose[:3, 1] = y_axis
+    light_pose[:3, 2] = z_axis
+    scene.add(light, pose=light_pose)
 
     # Render the scene
     r = pyrender.OffscreenRenderer(obsinfo.width, obsinfo.height)

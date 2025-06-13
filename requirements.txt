@@ -1,6 +1,8 @@
-matplotlib==3.1.3
-numpy==1.18.2
-Pillow==7.0.0
-pyrender==0.1.39
-spiceypy==3.0.2
-trimesh==3.6.33
+matplotlib
+numpy
+Pillow
+pyrender==0.1.45
+spiceypy
+trimesh
+networkx==3.5
+PyOpenGL==3.1.5
