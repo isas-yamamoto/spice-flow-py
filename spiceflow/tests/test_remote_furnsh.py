@@ -1,7 +1,9 @@
+import pytest
 import unittest
 from spiceflow.furnsh import remote_furnsh
 
 
+@pytest.mark.integration
 class TestCase(unittest.TestCase):
     def test_remote_furnsh(self):
         url = (

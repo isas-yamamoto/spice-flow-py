@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spice-flow"
+version = "0.1.0"
+description = "Field of view visualizer using SPICE"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Yukio Yamamoto", email = "yukio@planeta.sci.isas.jaxa.jp" }]
+dependencies = [
+  "matplotlib",
+  "numpy>=1.26.0,<2.0",
+  "Pillow",
+  "pyrender==0.1.45",
+  "spiceypy>=6.0.0",
+  "trimesh",
+  "networkx==3.5",
+  "PyOpenGL>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/isas-yamamoto/spice-flow-py"
+
+[tool.setuptools.packages.find]
+include = ["spiceflow*"]
+
+[tool.pytest.ini_options]
+testpaths = ["spiceflow/tests"]
+markers = [
+  "integration: tests that require network access",
+  "gl: tests that require OSMesa / OpenGL",
+]

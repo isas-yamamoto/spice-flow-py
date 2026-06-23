@@ -6,12 +6,27 @@ SPICE Flow is a Python-based field-of-view visuallizer using SPICE technologies
 for planetary explorers.
 """
 
-# current version
 from .version import __version__
 
-from .simulate import simulate
-from .render import render
-from .furnsh import remote_furnsh
+_LAZY_EXPORTS = {
+    "simulate": ".simulate",
+    "render": ".render",
+    "remote_furnsh": ".furnsh",
+    "enable_headless_pyrender": ".headless",
+}
+
+__all__ = ["__version__", *_LAZY_EXPORTS]
 
 
-__all__ = [__version__, "simulate", "render", "remote_furnsh"]
+def __getattr__(name: str):
+    if name not in _LAZY_EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_name, attr = _LAZY_EXPORTS[name], name
+    if module_name.startswith("."):
+        import importlib
+
+        module = importlib.import_module(module_name, __name__)
+        value = getattr(module, attr)
+        globals()[name] = value
+        return value
+    raise AttributeError(name)
