@@ -6,9 +6,9 @@ from pathlib import Path
 
 import spiceypy as spice
 
-__all__ = ["download", "remote_furnsh", "validate_kernel_files"]
+__all__ = ["download", "remote_furnsh", "validate_kernel_files", "validate_spice_kernel_files"]
 
-_REQUEST_HEADERS = {"User-Agent": "spice-flow-py/0.1.2"}
+_REQUEST_HEADERS = {"User-Agent": "spice-flow-py/0.1.4"}
 _DEFAULT_CHUNK_SIZE = 1024 * 1024
 _DEFAULT_TIMEOUT_S = 600
 
@@ -70,12 +70,70 @@ def _meta_kernel_to_urls(meta_kernel, url, local_kernel_dir, remote_root):
     return kernel_urls
 
 
+def _warn_colab_drive_path(local_kernel_dir: str) -> None:
+    try:
+        from .compat import is_colab
+    except ImportError:
+        return
+    if not is_colab():
+        return
+    lowered = local_kernel_dir.lower().replace("\\", "/")
+    if "/drive/" in lowered or "my drive" in lowered:
+        import warnings
+
+        warnings.warn(
+            "Google Drive paths are unreliable for large SPICE kernels (multi‑hundred MB "
+            "BSP/CK files often end up corrupted). Use "
+            'local_kernel_dir="/content/flow/kernels/SELENE" instead.',
+            UserWarning,
+            stacklevel=3,
+        )
+
+
+def validate_spice_kernel_files(kernels) -> None:
+    """Open each kernel with SPICE to catch truncated/corrupt DAF files early."""
+    problems: list[str] = []
+    for _url, local_path in kernels:
+        path = Path(local_path)
+        if not path.is_file():
+            continue
+        suffix = path.suffix.lower()
+        try:
+            if suffix == ".bsp":
+                spice.spkobj(str(path))
+            elif suffix == ".bc":
+                spice.ckobj(str(path))
+        except spice.utils.exceptions.SpiceyError as exc:
+            size = path.stat().st_size
+            problems.append(f"{local_path} ({size} bytes): {exc}")
+
+    if not problems:
+        return
+
+    joined = "\n  ".join(problems)
+    raise OSError(
+        "One or more SPICE kernel files are corrupt or incomplete:\n  "
+        f"{joined}\n"
+        "On Colab, delete the kernel tree and re-download to /content/flow/kernels/SELENE "
+        "with remote_furnsh(..., force=True). Do not use Google Drive for kernel storage."
+    )
+
+
 def validate_kernel_files(kernels) -> None:
     missing: list[str] = []
-    for _url, local_path in kernels:
+    short: list[str] = []
+    for url, local_path in kernels:
         path = Path(local_path)
         if not path.is_file() or path.stat().st_size == 0:
             missing.append(local_path)
+            continue
+        expected = _remote_content_length(url)
+        if expected is not None:
+            actual = path.stat().st_size
+            if actual != expected:
+                short.append(
+                    f"{local_path}: {actual} bytes (expected {expected})"
+                )
     if missing:
         joined = "\n  ".join(missing)
         raise FileNotFoundError(
@@ -83,6 +141,13 @@ def validate_kernel_files(kernels) -> None:
             f"{joined}\n"
             "Tip: on Google Colab use a local path such as /content/flow/kernels "
             "(not Google Drive) for large SPICE archives, or pass force=True to retry."
+        )
+    if short:
+        joined = "\n  ".join(short)
+        raise OSError(
+            "Kernel file sizes do not match the remote archive (download likely truncated):\n  "
+            f"{joined}\n"
+            "Re-run remote_furnsh(..., force=True) to a path under /content/."
         )
 
 
@@ -205,6 +270,7 @@ def remote_furnsh(
     when written directly to Drive FUSE mounts.
     """
     url = _normalize_kernel_url(url)
+    _warn_colab_drive_path(local_kernel_dir)
     mk = tempfile.NamedTemporaryFile(delete=False)
     try:
         with urllib.request.urlopen(
@@ -217,6 +283,7 @@ def remote_furnsh(
         kernels = _meta_kernel_to_urls(mk.name, url, local_kernel_dir, remote_root)
         _download_kernels(kernels, verbose=verbose, force=force)
         validate_kernel_files(kernels)
+        validate_spice_kernel_files(kernels)
         _make_new_meta_kernel(local_kernel_dir, filename)
         spice.furnsh(filename)
         return filename

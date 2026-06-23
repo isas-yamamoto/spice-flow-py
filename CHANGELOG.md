@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.4] - 2026-06-23
+
+### Fixed
+
+- `remote_furnsh` validates kernel byte sizes against DARTS `Content-Length`
+- `validate_spice_kernel_files()` opens `.bsp` / `.bc` with SPICE before `furnsh`
+- Warn when `local_kernel_dir` points at Google Drive on Colab
+
 ## [0.1.3] - 2026-06-23
 
 ### Fixed
@@ -69,6 +77,7 @@ All notable changes to this project are documented in this file.
 - `setup.py` reads version from `spiceflow/version.py`
 - README expanded with install, usage, and headless notes
 
+[0.1.4]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.0...v0.1.1
