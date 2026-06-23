@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.2] - 2026-06-23
+
+### Fixed
+
+- `remote_furnsh` / `download`: stream large kernels in chunks instead of loading into memory
+- Re-download kernels when file is missing, empty, or size mismatches `Content-Length`
+- Upgrade DARTS `http://` URLs to `https://` automatically
+- Validate all kernel files exist before `spice.furnsh` with a clearer error message
+- Added `force=True` option to `remote_furnsh` to retry failed/partial downloads
+
+### Added
+
+- `validate_kernel_files()` helper
+- Colab README guidance: use `/content/...` instead of Google Drive for large kernels
+
 ## [0.1.1] - 2026-06-23
 
 ### Added
@@ -41,5 +56,6 @@ All notable changes to this project are documented in this file.
 - `setup.py` reads version from `spiceflow/version.py`
 - README expanded with install, usage, and headless notes
 
+[0.1.2]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.0.1...v0.1.0

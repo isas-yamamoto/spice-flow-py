@@ -20,7 +20,7 @@ Related project: [spice-flow-web](https://github.com/isas-yamamoto/spice-flow-we
 ## Install
 
 ```bash
-pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.1"
+pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.2"
 ```
 
 Development install:
@@ -38,7 +38,7 @@ Works with **NumPy 1.26+ and NumPy 2.x** (Colab, JAX, etc.). A small compatibili
 Colab ships NumPy 2.x. **Do not downgrade NumPy** — use v0.1.1 or later:
 
 ```python
-!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.1"
+!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.2"
 
 from spiceflow import enable_colab_render, simulate, render
 
@@ -47,6 +47,28 @@ enable_colab_render()  # NumPy 2.x shim + EGL on Colab
 
 If pip reports dependency warnings but does **not** uninstall NumPy 2.x, you are fine.  
 If an older `spice-flow` release downgraded NumPy, use **Runtime → Restart session** after upgrading.
+
+### SPICE kernels on Colab
+
+SELENE kernels are **large** (CK files ~400 MB). Avoid Google Drive paths for downloads:
+
+```python
+# Recommended: local Colab disk (fast, reliable)
+KERNEL_DIR = "/content/flow/kernels/SELENE"
+
+url = "https://darts.isas.jaxa.jp/pub/pds3/sln-l-spice-6-v1.0/slnsp_1000/extras/mk/SEL_V02.TM"
+from spiceflow import remote_furnsh
+
+remote_furnsh(
+    url,
+    "/content/flow/kernels/selene_colab.tm",
+    KERNEL_DIR,
+    force=True,  # retry if a previous partial download exists
+)
+```
+
+If you previously used `My Drive/...` and see `SpiceFILEREADFAILED`, delete the broken
+`data/ck/*.BC` files (or the whole `SELENE` folder) and re-run with `/content/...`.
 
 Optional (only if EGL fails on your runtime):
 
