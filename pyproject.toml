@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spice-flow"
-version = "0.1.2"
+version = "0.1.3"
 description = "Field of view visualizer using SPICE"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,8 +21,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+render = [
+  "PyOpenGL>=3.1.5",
+  "freetype-py",
+  "pyglet",
+  "imageio",
+]
 dev = [
   "pytest>=8.0.0",
+  "pyrender==0.1.45",
+  "PyOpenGL>=3.1.5",
+  "freetype-py",
+  "pyglet",
+  "imageio",
 ]
 
 [project.urls]

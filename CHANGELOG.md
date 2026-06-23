@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.3] - 2026-06-23
+
+### Fixed
+
+- Lazy-import `pyrender` so `enable_colab_render()` can run before OpenGL loads
+- Colab: install EGL/GL apt packages, try `egl` then `osmesa`, smoke-test `OffscreenRenderer`
+- Pin `PyOpenGL>=3.1.5` via `requirements-colab.txt` (Colab `--no-deps` install path)
+- Delete `OffscreenRenderer` after use in `render()`
+
+### Added
+
+- `install_colab_gl_packages()` and clearer errors when Colab GL setup fails
+
 ## [0.1.2] - 2026-06-23
 
 ### Fixed
@@ -56,6 +69,7 @@ All notable changes to this project are documented in this file.
 - `setup.py` reads version from `spiceflow/version.py`
 - README expanded with install, usage, and headless notes
 
+[0.1.3]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.0.1...v0.1.0

@@ -1,20 +1,31 @@
 import numpy as np
 import spiceypy as spice
-
-from .compat import apply_pyrender_compat
-
-apply_pyrender_compat()
-import pyrender
 import trimesh
 from PIL import Image, ImageOps
+
+from .compat import apply_pyrender_compat
 from .render_util import bg_color_rgba
 from .star import star_texture
+
+_pyrender = None
+
+
+def _get_pyrender():
+    """Import pyrender after enable_colab_render() / enable_headless_pyrender()."""
+    global _pyrender
+    if _pyrender is None:
+        apply_pyrender_compat()
+        import pyrender as pyrender_mod
+
+        _pyrender = pyrender_mod
+    return _pyrender
 
 
 def render_solar_object(solar_object, wireframe):
     if "model" not in solar_object:
         return None
 
+    pyrender = _get_pyrender()
     model = solar_object["model"]
     mesh = None
     if model["type"] == "texture-body":
@@ -78,6 +89,7 @@ def _directional_light_pose(light_direction):
 
 
 def render(obsinfo, bg_color=None, wireframe=False, intensity=10.0):
+    pyrender = _get_pyrender()
     rgba = bg_color_rgba(bg_color)
     scene = pyrender.Scene(bg_color=list(rgba[:3]))
     camera = pyrender.PerspectiveCamera(
@@ -106,12 +118,13 @@ def render(obsinfo, bg_color=None, wireframe=False, intensity=10.0):
     light = pyrender.DirectionalLight(color=[1.0, 1.0, 1.0], intensity=intensity)
     scene.add(light, pose=_directional_light_pose(obsinfo.pos))
 
-    # Render the scene
-    r = pyrender.OffscreenRenderer(obsinfo.width, obsinfo.height)
-    flags = pyrender.RenderFlags.RGBA | pyrender.RenderFlags.SHADOWS_DIRECTIONAL
-    foreground, _ = r.render(scene, flags=flags)
+    renderer = pyrender.OffscreenRenderer(obsinfo.width, obsinfo.height)
+    try:
+        flags = pyrender.RenderFlags.RGBA | pyrender.RenderFlags.SHADOWS_DIRECTIONAL
+        foreground, _ = renderer.render(scene, flags=flags)
+    finally:
+        renderer.delete()
 
-    # background layer: star_image, foreground layer:foreground
     bg_color_int = (np.array(rgba) * 255).astype(int)
     return np.where(
         foreground != bg_color_int,

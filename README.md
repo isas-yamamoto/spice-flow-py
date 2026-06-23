@@ -20,7 +20,7 @@ Related project: [spice-flow-web](https://github.com/isas-yamamoto/spice-flow-we
 ## Install
 
 ```bash
-pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.2"
+pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.3"
 ```
 
 Development install:
@@ -35,18 +35,30 @@ Works with **NumPy 1.26+ and NumPy 2.x** (Colab, JAX, etc.). A small compatibili
 
 ## Google Colab
 
-Colab ships NumPy 2.x. **Do not downgrade NumPy** — use v0.1.1 or later:
+Use **v0.1.3+** and install in this order (keeps NumPy 2.x and PyOpenGL 3.1.5+):
 
 ```python
-!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.2"
+!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.3"
 
-from spiceflow import enable_colab_render, simulate, render
+from spiceflow import enable_colab_render
 
-enable_colab_render()  # NumPy 2.x shim + EGL on Colab
+enable_colab_render()  # installs EGL libs, picks egl/osmesa, smoke-tests pyrender
+
+from spiceflow import simulate, render
 ```
 
-If pip reports dependency warnings but does **not** uninstall NumPy 2.x, you are fine.  
-If an older `spice-flow` release downgraded NumPy, use **Runtime → Restart session** after upgrading.
+If OpenGL still fails after earlier experiments, use **Runtime → Restart session**, then run only the cells above.
+
+Fallback install when pip downgrades PyOpenGL to 3.1.0 (recommended on Colab):
+
+```python
+!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.3" --no-deps
+!pip -q install -r https://raw.githubusercontent.com/isas-yamamoto/spice-flow-py/develop/requirements-colab.txt
+!pip -q install pyrender==0.1.45 --no-deps
+
+from spiceflow import enable_colab_render
+enable_colab_render()
+```
 
 ### SPICE kernels on Colab
 
