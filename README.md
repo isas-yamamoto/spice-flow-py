@@ -20,7 +20,7 @@ Related project: [spice-flow-web](https://github.com/isas-yamamoto/spice-flow-we
 ## Install
 
 ```bash
-pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.0"
+pip install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.1"
 ```
 
 Development install:
@@ -31,7 +31,29 @@ cd spice-flow-py
 pip install -e ".[dev]"
 ```
 
-NumPy must stay below 2.0 for compatibility with `pyrender==0.1.45`.
+Works with **NumPy 1.26+ and NumPy 2.x** (Colab, JAX, etc.). A small compatibility shim restores `np.infty` for `pyrender==0.1.45`.
+
+## Google Colab
+
+Colab ships NumPy 2.x. **Do not downgrade NumPy** — use v0.1.1 or later:
+
+```python
+!pip -q install "git+https://github.com/isas-yamamoto/spice-flow-py.git@v0.1.1"
+
+from spiceflow import enable_colab_render, simulate, render
+
+enable_colab_render()  # NumPy 2.x shim + EGL on Colab
+```
+
+If pip reports dependency warnings but does **not** uninstall NumPy 2.x, you are fine.  
+If an older `spice-flow` release downgraded NumPy, use **Runtime → Restart session** after upgrading.
+
+Optional (only if EGL fails on your runtime):
+
+```python
+import os
+os.environ["PYOPENGL_PLATFORM"] = "osmesa"  # rarely needed on Colab
+```
 
 ## Quick start
 
@@ -92,6 +114,7 @@ export PYOPENGL_PLATFORM=osmesa
 | `render(obsinfo, ...)` | Render RGBA image with pyrender |
 | `remote_furnsh(url, path)` | Download kernels referenced by a remote meta kernel |
 | `enable_headless_pyrender()` | OSMesa + pyrender stubs for headless use |
+| `enable_colab_render()` | NumPy 2.x shim + EGL defaults for Google Colab |
 
 ## Tests
 

@@ -13,6 +13,7 @@ _LAZY_EXPORTS = {
     "render": ".render",
     "remote_furnsh": ".furnsh",
     "enable_headless_pyrender": ".headless",
+    "enable_colab_render": ".compat",
 }
 
 __all__ = ["__version__", *_LAZY_EXPORTS]

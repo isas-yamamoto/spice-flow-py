@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import os
 import sys
-import types
+
+from .compat import apply_pyrender_compat, patch_pyrender_viewer_stub
 
 
 def _patch_osmesa() -> None:
@@ -29,25 +30,8 @@ def _patch_osmesa() -> None:
     osmesa.OSMesaCreateContextAttribs = osmesa_create_context_attribs
 
 
-def _patch_numpy_for_pyrender() -> None:
-    # pyrender still references np.infty, removed in NumPy 2.0.
-    import numpy as np
-
-    if not hasattr(np, "infty"):
-        np.infty = np.inf
-
-
 def enable_headless_pyrender() -> None:
     """Configure OSMesa and stubs so pyrender works without a display."""
-    _patch_numpy_for_pyrender()
+    apply_pyrender_compat()
     _patch_osmesa()
-    if "pyrender.viewer" in sys.modules:
-        return
-
-    viewer_stub = types.ModuleType("pyrender.viewer")
-
-    class Viewer:  # noqa: D101 - headless stub for pyrender
-        pass
-
-    viewer_stub.Viewer = Viewer
-    sys.modules["pyrender.viewer"] = viewer_stub
+    patch_pyrender_viewer_stub()

@@ -1,5 +1,9 @@
 import numpy as np
 import spiceypy as spice
+
+from .compat import apply_pyrender_compat
+
+apply_pyrender_compat()
 import pyrender
 import trimesh
 from PIL import Image, ImageOps

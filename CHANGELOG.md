@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.1] - 2026-06-23
+
+### Added
+
+- `spiceflow.compat.apply_pyrender_compat()` — NumPy 2.x shim (`np.infty`) applied before pyrender import
+- `enable_colab_render()` for Google Colab (EGL + NumPy compatibility)
+- README section for Colab install
+
+### Fixed
+
+- Removed `numpy<2.0` pin so Colab/JAX/OpenCV stacks are not broken by install
+- Relaxed `networkx==3.5` to `networkx>=3.5`
+- Dropped explicit `PyOpenGL` dependency (let `pyrender` resolve it; avoids fighting Colab's PyOpenGL)
+
 ## [0.1.0] - 2026-06-23
 
 ### Added
@@ -27,4 +41,5 @@ All notable changes to this project are documented in this file.
 - `setup.py` reads version from `spiceflow/version.py`
 - README expanded with install, usage, and headless notes
 
+[0.1.1]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/isas-yamamoto/spice-flow-py/compare/v0.0.1...v0.1.0
